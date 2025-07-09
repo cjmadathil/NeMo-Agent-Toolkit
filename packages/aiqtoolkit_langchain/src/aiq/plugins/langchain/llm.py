@@ -17,6 +17,7 @@ from aiq.builder.builder import Builder
 from aiq.builder.framework_enum import LLMFrameworkEnum
 from aiq.cli.register_workflow import register_llm_client
 from aiq.llm.aws_bedrock_llm import AWSBedrockModelConfig
+from aiq.llm.dev_genai_llm import DevGenAIModelConfig
 from aiq.llm.nim_llm import NIMModelConfig
 from aiq.llm.openai_llm import OpenAIModelConfig
 
@@ -49,3 +50,11 @@ async def aws_bedrock_langchain(llm_config: AWSBedrockModelConfig, builder: Buil
     from langchain_aws import ChatBedrockConverse
 
     yield ChatBedrockConverse(**llm_config.model_dump(exclude={"type", "context_size"}, by_alias=True))
+
+
+@register_llm_client(config_type=DevGenAIModelConfig, wrapper_type=LLMFrameworkEnum.LANGCHAIN)
+async def dev_genai_langchain(llm_config: DevGenAIModelConfig, builder: Builder):
+
+    from langchain_dev_genai import ChatDevGenAI
+
+    yield ChatDevGenAI(**llm_config.model_dump(exclude={"type"}, by_alias=True))

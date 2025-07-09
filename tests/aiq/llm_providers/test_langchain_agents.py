@@ -19,6 +19,7 @@ from langchain_core.prompts import ChatPromptTemplate
 from aiq.builder.framework_enum import LLMFrameworkEnum
 from aiq.builder.workflow_builder import WorkflowBuilder
 from aiq.llm.aws_bedrock_llm import AWSBedrockModelConfig
+from aiq.llm.dev_genai_llm import DevGenAIModelConfig
 from aiq.llm.nim_llm import NIMModelConfig
 from aiq.llm.openai_llm import OpenAIModelConfig
 
@@ -85,6 +86,28 @@ async def test_aws_bedrock_langchain_agent():
     async with WorkflowBuilder() as builder:
         await builder.add_llm("aws_bedrock_llm", llm_config)
         llm = await builder.get_llm("aws_bedrock_llm", wrapper_type=LLMFrameworkEnum.LANGCHAIN)
+
+        agent = prompt | llm
+
+        response = await agent.ainvoke({"input": "What is 1+2?"})
+        assert isinstance(response, AIMessage)
+        assert response.content is not None
+        assert isinstance(response.content, str)
+        assert "3" in response.content.lower()
+
+
+@pytest.mark.integration
+async def test_dev_genai_langchain_agent():
+    """
+    Test Dev GenAI LLM with LangChain agent. Requires DEV_GENAI_API_KEY to be set.
+    """
+    prompt = ChatPromptTemplate.from_messages([("system", "You are a helpful AI assistant."), ("human", "{input}")])
+
+    llm_config = DevGenAIModelConfig(model_name="dev-genai-chat", temperature=0.0)
+
+    async with WorkflowBuilder() as builder:
+        await builder.add_llm("dev_genai_llm", llm_config)
+        llm = await builder.get_llm("dev_genai_llm", wrapper_type=LLMFrameworkEnum.LANGCHAIN)
 
         agent = prompt | llm
 

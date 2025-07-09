@@ -16,6 +16,7 @@
 from aiq.builder.builder import Builder
 from aiq.builder.framework_enum import LLMFrameworkEnum
 from aiq.cli.register_workflow import register_embedder_client
+from aiq.embedder.dev_genai_embedder import DevGenAIEmbedderModelConfig
 from aiq.embedder.nim_embedder import NIMEmbedderModelConfig
 
 
@@ -39,3 +40,11 @@ async def nim_llamaindex(embedder_config: NIMEmbedderModelConfig, builder: Build
     }
 
     yield NVIDIAEmbedding(**config_obj)
+
+
+@register_embedder_client(config_type=DevGenAIEmbedderModelConfig, wrapper_type=LLMFrameworkEnum.LANGCHAIN)
+async def dev_genai_langchain(embedder_config: DevGenAIEmbedderModelConfig, builder: Builder):
+
+    from langchain_dev_genai import DevGenAIEmbeddings
+
+    yield DevGenAIEmbeddings(**embedder_config.model_dump(exclude={"type"}, by_alias=True))

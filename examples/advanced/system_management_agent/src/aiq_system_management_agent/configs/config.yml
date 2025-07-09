@@ -1,0 +1,80 @@
+# System Management Agent Configuration
+# This configuration uses the Dev GenAI LLM provider
+
+functions:
+  # Web Search Tool Configuration
+  web_search_tool:
+    _type: web_search_tool
+    allowed_urls:
+      - "https://docs.nvidia.com"
+      - "https://developer.nvidia.com"
+      - "https://www.redhat.com"
+      - "https://docs.redhat.com"
+      - "https://access.redhat.com"
+      - "https://docs.vmware.com"
+      - "https://kb.vmware.com"
+    max_content_length: 10000
+    timeout: 30
+    max_retries: 3
+
+  # PDF Embeddings Tool Configuration
+  pdf_embeddings_tool:
+    _type: pdf_embeddings_tool
+    pdf_directory: "./data/pdfs"
+    embeddings_model: "all-MiniLM-L6-v2"
+    chunk_size: 1000
+    chunk_overlap: 100
+    max_results: 5
+    similarity_threshold: 0.5
+    cache_embeddings: true
+    cache_directory: "./data/embeddings_cache"
+
+  # Redfish API Tool Configuration
+  redfish_api_tool:
+    _type: redfish_api_tool
+    bmc_endpoints:
+      - "https://192.168.1.100"
+      - "https://10.0.0.100"
+    username: "admin"
+    password: "admin"
+    timeout: 30
+    verify_ssl: false
+    max_retries: 3
+    mock_mode: true  # Set to false for real BMC endpoints
+
+  # Main System Management Agent
+  system_management_agent:
+    _type: system_management_agent
+    tool_names:
+      - "web_search_tool"
+      - "pdf_embeddings_tool"
+      - "redfish_api_tool"
+    llm_name: "dev_genai_llm"
+    verbose: true
+    max_iterations: 10
+
+llms:
+  # Dev GenAI LLM Configuration
+  dev_genai_llm:
+    _type: dev_genai
+    api_key: "${DEV_GENAI_API_KEY}"
+    base_url: "https://api.dev-genai.com/v1"
+    model_name: "dev-genai-chat"
+    temperature: 0.3
+    max_tokens: 2048
+    timeout: 60
+    max_retries: 3
+    streaming: false
+    top_p: 0.9
+    frequency_penalty: 0.0
+    presence_penalty: 0.0
+
+workflow:
+  _type: system_management_agent
+  tool_names:
+    - "web_search_tool"
+    - "pdf_embeddings_tool"
+    - "redfish_api_tool"
+  llm_name: "dev_genai_llm"
+  verbose: true
+  max_iterations: 10
